@@ -1,13 +1,11 @@
-require(['player'], function(Player){
+require(['sprites/player', 'sprites/platform', 'game'], function(Player, Platform, game){
 
 	//Parent div of the game
 	var gameDiv = document.createElement("div");
 	gameDiv.id = 'gameDiv';
 	document.body.appendChild(gameDiv);
 
-	var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameDiv');
 	var player;
-
 
 	//Boot State
 	var boot = function() {}
@@ -17,7 +15,10 @@ require(['player'], function(Player){
 			game.load.image('loadingBar', 'assets/loading/loadingbar.png');
 		},
 		create : function() {
+			game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+			game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
 			game.state.start('preload');
+			
 		},
 		update : function() {
 
@@ -37,7 +38,10 @@ require(['player'], function(Player){
 			var text  = game.add.text(game.world.centerX, game.world.centerY-100, "Loading", textStyle);
 			text.anchor.set(0.5);
 
+			//Images loadings
 			game.load.image('player', 'assets/sprites/player/player_idle.png');
+			game.load.image('platform_test', 'assets/sprites/platforms/platform_test.png');
+			game.load.image('sky', 'assets/background/background.png');
 		},
 		create : function() {
 			game.state.start('titlecard');
@@ -45,14 +49,20 @@ require(['player'], function(Player){
 	}
 	
 	//TitleCard State
-	var titlecard = function(game) {}
+	var titlecardState = function(game) {}
 
-	titlecard.prototype = {
+	titlecardState.prototype = {
 		preload : function() {
 			
 		},
 		create : function() {
-			game.add.button(200 , 200, 'loadingBar')
+			var titleTextStyle = {font : "36px Arial", fill : "#fff"};
+			var titleText = game.add.text(game.world.centerX, game.world.centerY, "TitleCard", titleTextStyle);
+			
+			game.add.button(200 , 200, 'loadingBar', this.loadCoreGame, this);
+		},
+		loadCoreGame : function () {
+			game.state.start('coreGame');
 		}
 	}
 
@@ -64,7 +74,34 @@ require(['player'], function(Player){
 			
 		},
 		create : function() {
+			game.world.setBounds(0, 0, 4000, 1920);
+			var sky = game.add.sprite(0, 0, 'sky');
+			sky.z = 0;
 
+			game.physics.startSystem(Phaser.Physics.ARCADE);
+			player = new Player();
+			game.gameObjects.hasDoAction.push(player);
+			player.setPhysics();
+
+			game.camera.follow(player.sprite);
+
+			var platform = new Platform({
+				group : game.gameObjects.groups.platforms,
+				x : 0,
+				y : game.world.height - 64
+			});
+			platform.sprite.scale.set = (7, 1);
+			Platform.enablePhysicsOnGroup();
+			
+
+		},
+		update : function() {
+			game.physics.arcade.collide(player.sprite, game.gameObjects.groups.platforms);
+
+			for (var i = game.gameObjects.hasDoAction.length-1; i >= 0; i--) {
+				game.gameObjects.hasDoAction[i].doAction();
+			}
+			
 		}
 	}
 
@@ -72,24 +109,8 @@ require(['player'], function(Player){
 	//Adding states to the game
 	game.state.add("boot", boot);
 	game.state.add("preload", preload);
-	game.state.add("titlecard", titlecard);
+	game.state.add("titlecard", titlecardState);
 	game.state.add("coreGame", coreGame);
 
 	game.state.start('boot');
-
-	function create() {
-		//game.world.setBounds
-		game.physics.startSystem(Phaser.Physics.P2JS);
-		player = new Player({
-			game : game
-		});
-
-		player.setPhysics();
-	}
-
-	function update() {
-		player.doAction();
-	}
-
-
 });

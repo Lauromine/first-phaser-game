@@ -1,14 +1,11 @@
-define(['controller', 'add_do_action_capabilities'],function(Controller, addDoActionCapabilities){
+define(['game','controller', 'add_do_action_capabilities'],function(game, Controller, addDoActionCapabilities){
 
 	function Player (pParams) {
 		var params = pParams || {};
-		var game = params.game || {};
+		var initX  = params.x || 0;
+		var initY  = params.y || 0;
 
-		this.x = params.x || 0;
-		this.y = params.y || 0;
-
-		
-		this.sprite = game.add.sprite(this.x, this.y, 'player');
+		this.sprite = game.add.sprite(initX, initY, 'player');
 		this.spritetest = game.add.sprite(0, 0, 'loadingBar');
 		
 		this.sprite.addChild(this.spritetest);
@@ -16,9 +13,9 @@ define(['controller', 'add_do_action_capabilities'],function(Controller, addDoAc
 		this.inventory = {};
 
 		this.speed = {
-			x : 100,
-			y : 100,
-			jump : -300
+			x : 800,
+			y : 800,
+			jump : -500
 		}
 
 		//Adds basic doActionMethods
@@ -26,14 +23,14 @@ define(['controller', 'add_do_action_capabilities'],function(Controller, addDoAc
 		this.setModeNormal();
 
 		this.controller = new Controller();
-
 		//Controls related
 		this.hasJumped = false;
+
+		game.gameObjects.hasDoAction.push(this);
 	}
 
 	Player.prototype.setPhysics = function() {
 		var sprite = this.sprite;
-		var game   = sprite.game;
 		game.physics.arcade.enable(sprite);
 
 		sprite.body.gravity.y = 500;
@@ -71,7 +68,6 @@ define(['controller', 'add_do_action_capabilities'],function(Controller, addDoAc
 			playerBody.velocity.y = this.speed.jump;
 		}
 		this.hasJumped = controller.jump;
-
 	}
 
 	return Player;
