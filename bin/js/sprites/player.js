@@ -1,4 +1,4 @@
-define(['controller'],function(Controller){
+define(['controller', 'add_do_action_capabilities'],function(Controller, addDoActionCapabilities){
 
 	function Player (pParams) {
 		var params = pParams || {};
@@ -7,7 +7,11 @@ define(['controller'],function(Controller){
 		this.x = params.x || 0;
 		this.y = params.y || 0;
 
+		
 		this.sprite = game.add.sprite(this.x, this.y, 'player');
+		this.spritetest = game.add.sprite(0, 0, 'loadingBar');
+		
+		this.sprite.addChild(this.spritetest);
 
 		this.inventory = {};
 
@@ -17,6 +21,8 @@ define(['controller'],function(Controller){
 			jump : -300
 		}
 
+		//Adds basic doActionMethods
+		//addDoActionCapabilities(this);
 		this.setModeNormal();
 
 		this.controller = new Controller();
@@ -28,21 +34,23 @@ define(['controller'],function(Controller){
 	Player.prototype.setPhysics = function() {
 		var sprite = this.sprite;
 		var game   = sprite.game;
-		game.physics.p2.enable(sprite);
+		game.physics.arcade.enable(sprite);
 
-		sprite.body.gravity.y = 300;
+		sprite.body.gravity.y = 500;
 		sprite.body.collideWorldBounds = true;
 		sprite.body.bounce.y = 0.2;
 	}
 
-	Player.prototype.doAction = function() {};
-
-	Player.prototype.doActionNormal = function () {
-		this.doControls();
+	Player.prototype.doAction = function () {
+		
 	}
 
 	Player.prototype.setModeNormal = function () {
 		this.doAction = this.doActionNormal;
+	}
+
+	Player.prototype.doActionNormal = function () {
+		this.doControls();
 	}
 
 	Player.prototype.doControls = function () {
